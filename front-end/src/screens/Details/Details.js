@@ -165,12 +165,17 @@ const Details = () => {
   } = useHistory();
   const [search, setSearch] = useState((state && state.term) || "");
   const [results, setResults] = useState([]);
+  const [noResults, setNoResults] = useState(false);
 
   const getResults = term => {
+    setNoResults(false);
     fetch(`/api/results?search=${term}`)
       .then(res => res.json())
       .then(res => {
-        if (Array.isArray(res)) setResults(res);
+        if (Array.isArray(res) && res.length > 0) setResults(res);
+        else {
+          setResults([]);
+          setNoResults(true);
       });
   };
 
@@ -242,8 +247,7 @@ const Details = () => {
                 </th>
               </tr>
             </thead>
-
-            {checkSpin(results) ? (
+            {checkSpin(results) && !noResults && (
               <MDSpinner
                 size={50}
                 style={{
@@ -251,7 +255,8 @@ const Details = () => {
                   marginLeft: "390px"
                 }}
               />
-            ) : (
+            )}
+            {!checkSpin(results) && (
               <TableBody>
                 {" "}
                 {results.map(item => (
@@ -259,6 +264,7 @@ const Details = () => {
                 ))}
               </TableBody>
             )}
+            {noResults && <p>There were no results</p>}
           </Table>
         </ResultsContainer>
       </Content>
